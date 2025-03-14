@@ -1,5 +1,8 @@
 ---
 import '../../src/styles/globals.css';
+import '@fontsource/baskervville';
+import '@fontsource-variable/bodoni-moda';
+import '@fontsource-variable/bodoni-moda-sc';
 
 interface Props {
     title: string;
@@ -19,8 +22,8 @@ const { title, classList } = Astro.props;
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <slot name="head" />
     </head>
-    <body class="antialiased text-white bg-blue-300 font-mono h-full" x-data>
-        <div class="flex flex-col xpx-6 bg-blue-300">
+    <body class="antialiased text-blackk bg-white font-mono h-full" x-data>
+        <div class="flex flex-col xpx-6 bg-white">
             <div class="flex flex-col w-full mx-auto grow">
                 <main class={classList}><slot /></main>
             </div>
@@ -28,7 +31,6 @@ const { title, classList } = Astro.props;
     </body>
 </html>
 <script>
-    //window.console.log = (...args) => console.log('KIOSK:', args);
     var __log = console.log;
     window.console.log = function () {
         var args = Array.from(arguments); // ES5

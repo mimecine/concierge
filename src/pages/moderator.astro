@@ -84,19 +84,19 @@ const Jitsi = {
 }.Self;
 ---
 
-<Layout title="Headroom Moderator">
-    <div class="grid h-screen grid-rows-[1fr,auto]">
-        <div class="grid grid-cols-[1fr,auto] grid-flow-col w-full h-full font-mono text-xs border-black flex grow">
-            <main class="bg-cyan-400 border-r border-black grid text-3xl font-bold font-sans">
+<Layout title="V: Concierge Moderator">
+    <div class="grid h-screen grid-rows-[1fr]">
+        <div class="grid grid-cols-[1fr] grid-flow-col w-full h-full text-xs border-black">
+            <main class="border-r border-black grid text-3xl font-bold font-sans w-full">
                 <div id="jaas-container" class="h-full"></div>
             </main>
 
-            <aside class="w-20 lg:w-40 grid grid-flow-row grid-rows-[1fr,auto] bg-pink-300">
+            <aside class="w-20 lg:w-40 grid grid-flow-row grid-rows-[1fr]">
                 <section x-data="{activeProduct:null}" class="overflow-scroll max-h-[calc(100vh-10rem)]" class="relative">
                     <ProductDialog />
                     <ProductList />
                 </section>
-                <section class="bg-green-300 h-20 lg:h-40 border-t border-black place-content-center grid text-xs lg:text-lg">
+                <section class="h-20 lg:h-40 border-t border-black place-content-center grid text-xs lg:text-lg">
                     <ShoppingCartButton
                         >[CART<span x-show="Alpine.store('globalCart').lines.length" x-text="`(${Alpine.store('globalCart').totalQuantity})`"
                         ></span>]</ShoppingCartButton
@@ -105,7 +105,7 @@ const Jitsi = {
                 </section>
             </aside>
         </div>
-        <div class="bg-red-100 min-h-16 text-black text-lg grid place-items-center" x-data>
+        <div class="bg-gray-100 min-h-16 text-black text-lg grid place-items-center" x-data>
             <div class="text-xl">PRODUCT: <input type="text" @keyup.enter="handleMessage({message:'/s '+$el.value});$el.value=''" /></div>
         </div>
     </div>
@@ -113,108 +113,111 @@ const Jitsi = {
 </Layout>
 <script async src={`https://${[Jitsi.domain, Jitsi.magicCookie || '', 'external_api.js'].join('/')}`}></script>
 <script define:vars={{ jitsi_jwt_token, configOverwrite, Jitsi }}>
-    window.addEventListener('load', () => {
-        window.jitsi = new JitsiMeetExternalAPI(Jitsi.domain, {
-            roomName: `${Jitsi.magicCookie || ''}/KIOSK_Headroom`,
-            parentNode: document.querySelector('#jaas-container'),
-            dynamicBrandingUrl: 'https://headroom.netlify.app/branding.json',
-            jwt: configOverwrite.jwt,
-            configOverwrite,
-            interfaceConfigOverwrite: {
-                APP_NAME: 'KIOSK',
-                DEFAULT_LOGO_URL: 'https://headroom.kioskkiosk.com/images/KIOSK-Logo.png',
-                DEFAULT_REMOTE_DISPLAY_NAME: ' ❤️ ',
-                BRAND_WATERMARK_LINK: 'https://kioskkiosk.com',
-                SHOW_JITSI_WATERMARK: false,
-                HIDE_DEEP_LINKING_LOGO: true,
-                SHOW_POWERED_BY: false,
-                SHOW_DEEP_LINKING_IMAGE: false,
-                SHOW_BRAND_WATERMARK: false
-            }
-        });
-        let messageOrder = 0;
-        handleMessage = async (e) => {
-            const re = new RegExp('/(?<cmd>[a-z]+)\\s?(?<order>:\\d+)?\\s?(?<args>.*)?');
-            const res = re.exec(e.message || e.subject);
-            let cmd = res.groups.cmd;
-            let order = res.groups.order;
-            let args = res.groups.args;
-            if (args == '...') {
-                cmd = '...';
-            }
+    if (false)
+        (() => {
+            window.addEventListener('load', () => {
+                window.jitsi = new JitsiMeetExternalAPI(Jitsi.domain, {
+                    roomName: `${Jitsi.magicCookie || ''}/KIOSK_Headroom`,
+                    parentNode: document.querySelector('#jaas-container'),
+                    dynamicBrandingUrl: 'https://headroom.netlify.app/branding.json',
+                    jwt: configOverwrite.jwt,
+                    configOverwrite,
+                    interfaceConfigOverwrite: {
+                        APP_NAME: 'KIOSK',
+                        DEFAULT_LOGO_URL: 'https://headroom.kioskkiosk.com/images/KIOSK-Logo.png',
+                        DEFAULT_REMOTE_DISPLAY_NAME: ' ❤️ ',
+                        BRAND_WATERMARK_LINK: 'https://kioskkiosk.com',
+                        SHOW_JITSI_WATERMARK: false,
+                        HIDE_DEEP_LINKING_LOGO: true,
+                        SHOW_POWERED_BY: false,
+                        SHOW_DEEP_LINKING_IMAGE: false,
+                        SHOW_BRAND_WATERMARK: false
+                    }
+                });
+                let messageOrder = 0;
+                handleMessage = async (e) => {
+                    const re = new RegExp('/(?<cmd>[a-z]+)\\s?(?<order>:\\d+)?\\s?(?<args>.*)?');
+                    const res = re.exec(e.message || e.subject);
+                    let cmd = res.groups.cmd;
+                    let order = res.groups.order;
+                    let args = res.groups.args;
+                    if (args == '...') {
+                        cmd = '...';
+                    }
 
-            if (res != null) {
-                switch (cmd) {
-                    case 's':
-                        let products = await suggestProducts(args);
-                        if (products.length > 0) {
-                            let product = products.at(0);
-                            products.at(0).order ??= messageOrder++;
-                            let local_products = Alpine.store('products');
-                            local_products = local_products.filter((p) => p.id !== product.id);
-                            local_products.unshift(product);
-                            local_products = distinct(Alpine.store('products'), 'id');
-                            local_products = local_products.sort((a, b) => b.order - a.order);
-                            Alpine.store('products', local_products);
-                            jitsi.executeCommand('sendChatMessage', `/addproduct :${messageOrder} ${products.at(0).title}`, '', false); //send to listeners
+                    if (res != null) {
+                        switch (cmd) {
+                            case 's':
+                                let products = await suggestProducts(args);
+                                if (products.length > 0) {
+                                    let product = products.at(0);
+                                    products.at(0).order ??= messageOrder++;
+                                    let local_products = Alpine.store('products');
+                                    local_products = local_products.filter((p) => p.id !== product.id);
+                                    local_products.unshift(product);
+                                    local_products = distinct(Alpine.store('products'), 'id');
+                                    local_products = local_products.sort((a, b) => b.order - a.order);
+                                    Alpine.store('products', local_products);
+                                    jitsi.executeCommand('sendChatMessage', `/addproduct :${messageOrder} ${products.at(0).title}`, '', false); //send to listeners
+                                }
+                                break;
+                            case 'addproduct':
+                                let products2 = await suggestProducts(args);
+                                if (products2.length > 0) {
+                                    products2.at(0).order = order.replace(/:/, '');
+                                    let local_products = Alpine.store('products');
+                                    local_products = local_products.filter((p) => p.id !== products2.at(0).id);
+                                    local_products.unshift(products2.at(0));
+                                    local_products = local_products.sort((a, b) => b.order - a.order);
+                                    Alpine.store('products', local_products);
+                                }
+                                break;
+                            case '...':
+                                let local_products2 = Alpine.store('products').filter((p) => true);
+                                local_products2.shift();
+                                Alpine.store('products', local_products2);
+                                jitsi.executeCommand('sendChatMessage', `/shift`, '', false); //send to listeners
+                                break;
+
+                            case 'log':
+                                break;
                         }
-                        break;
-                    case 'addproduct':
-                        let products2 = await suggestProducts(args);
-                        if (products2.length > 0) {
-                            products2.at(0).order = order.replace(/:/, '');
-                            let local_products = Alpine.store('products');
-                            local_products = local_products.filter((p) => p.id !== products2.at(0).id);
-                            local_products.unshift(products2.at(0));
-                            local_products = local_products.sort((a, b) => b.order - a.order);
-                            Alpine.store('products', local_products);
-                        }
-                        break;
-                    case '...':
-                        let local_products2 = Alpine.store('products').filter((p) => true);
-                        local_products2.shift();
-                        Alpine.store('products', local_products2);
-                        jitsi.executeCommand('sendChatMessage', `/shift`, '', false); //send to listeners
-                        break;
-
-                    case 'log':
-                        break;
-                }
-            }
-        };
-        jitsi.addListener('incomingMessage', handleMessage);
-        jitsi.addListener('outgoingMessage', handleMessage);
-        jitsi.addListener('participantRoleChanged', async (e) => {
-            moderators.push(e.id);
-            participants.filter((p) => p.id !== e.id);
-            window.ismoderator = e.role === 'moderator';
-            Alpine.store('moderator', window.ismoderator);
-        });
-        jitsi.addListener('participantJoined', async (e) => {
-            participants.push({ id: e.id, name: jitsi._participants[e.id].formattedDisplayName, order: participantCounter++ });
-            for (let i = 0; i < participants.length; i++) {
-                jitsi.executeCommand('sendChatMessage', `/queuenumber ${i + 1}`, participants.at(i).id, false); //send to listeners
-            }
-        });
-        jitsi.addListener('participantLeft', async (e) => {
-            participants = participants.filter((p) => p.id !== e.id);
-            for (let i = 0; i < participants.length; i++) {
-                jitsi.executeCommand('sendChatMessage', `/queuenumber ${i + 1}`, participants.at(i).id, false); //send to listeners
-            }
-        });
-    });
-    let distinct = (array, key) => [...new Map(array.map((item) => [item[key], item])).values()];
-    window.participants = [];
-    let moderators = [];
-    let participantCounter = 0;
-
-    setInterval(() => {
-        fetch('/here.json')
-            .then((res) => res.json())
-            .then((data) => {
-                if (data) {
-                    console.log(data);
-                }
+                    }
+                };
+                jitsi.addListener('incomingMessage', handleMessage);
+                jitsi.addListener('outgoingMessage', handleMessage);
+                jitsi.addListener('participantRoleChanged', async (e) => {
+                    moderators.push(e.id);
+                    participants.filter((p) => p.id !== e.id);
+                    window.ismoderator = e.role === 'moderator';
+                    Alpine.store('moderator', window.ismoderator);
+                });
+                jitsi.addListener('participantJoined', async (e) => {
+                    participants.push({ id: e.id, name: jitsi._participants[e.id].formattedDisplayName, order: participantCounter++ });
+                    for (let i = 0; i < participants.length; i++) {
+                        jitsi.executeCommand('sendChatMessage', `/queuenumber ${i + 1}`, participants.at(i).id, false); //send to listeners
+                    }
+                });
+                jitsi.addListener('participantLeft', async (e) => {
+                    participants = participants.filter((p) => p.id !== e.id);
+                    for (let i = 0; i < participants.length; i++) {
+                        jitsi.executeCommand('sendChatMessage', `/queuenumber ${i + 1}`, participants.at(i).id, false); //send to listeners
+                    }
+                });
             });
-    }, 1000);
+            let distinct = (array, key) => [...new Map(array.map((item) => [item[key], item])).values()];
+            window.participants = [];
+            let moderators = [];
+            let participantCounter = 0;
+
+            setInterval(() => {
+                fetch('/set-here.json')
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data) {
+                            console.log(data);
+                        }
+                    });
+            }, 1000);
+        })();
 </script>

@@ -1,10 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+@plugin 'daisyui';
 
 @layer base {
+    :root {
+        /* --font-sans: 'Inter', var(--font-sans); */
+        --font-serif: 'Bodoni Moda Variable';
+        --font-headline: 'Bodoni Moda SC Variable';
+    }
     p {
         @apply space-y-1;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-headline);
     }
 }
 
