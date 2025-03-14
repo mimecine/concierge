@@ -209,15 +209,14 @@ const Jitsi = {
             window.participants = [];
             let moderators = [];
             let participantCounter = 0;
-
-            setInterval(() => {
-                fetch('/set-here.json')
-                    .then((res) => res.json())
-                    .then((data) => {
-                        if (data) {
-                            console.log(data);
-                        }
-                    });
-            }, 1000);
         })();
+    setInterval(() => {
+        fetch('/set-here.json')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data) {
+                    console.log(data);
+                }
+            });
+    }, 1000);
 </script>
